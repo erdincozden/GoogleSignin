@@ -28,22 +28,21 @@ public class MainActivity  extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // Views
+
         mStatusTextView = (TextView) findViewById(R.id.status);
         imgProfilePic = (ImageView) findViewById(R.id.imgProfilePic);
-        // Button listener tanımladım...
+
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
         findViewById(R.id.disconnect_button).setOnClickListener(this);
-        // Kullanıcının ID, email adres, ve basit profil bilgilerini alabilmek için sign-in(oturum açma) ayarı yapıyoruz
-        // ID ve basit profil bilgileri DEFAULT_SIGN_IN içinde barınmaktadır
+
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestScopes(new Scope(Scopes.DRIVE_APPFOLDER))
                 .requestEmail()
                 .build();
-        //gso değişkeninde belirtilen seçeneklerle ve Google Sign-In API ile bağlantı kurmak için GoogleApiClient yapılandırdım.
+
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .enableAutoManage(this , this )
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
     }
@@ -52,13 +51,11 @@ public class MainActivity  extends AppCompatActivity implements
         super.onStart();
         OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
         if (opr.isDone()) {
-            //Kullanıcının önbelleğe kimlik bilgileri geçerli ise,  OptionalPendingResult tamamlancak ve
-            //GoogleSignInResult anında kullanılabilir olacak.
+
             GoogleSignInResult result = opr.get();
             handleSignInResult(result);
         } else {
-            //Kullanıcının daha önce telefonunda oturum açık değilse ya da  the otrum açma süresi dolmuş ise,
-            //bu asekron çalısan bölüm kullanıcı girişini sağlıcaktır
+
             showProgressDialog();
             opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
                 @Override
@@ -73,7 +70,7 @@ public class MainActivity  extends AppCompatActivity implements
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // GoogleSignInApi.getSignInIntent(...); döndüğü sonuc..
+
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             handleSignInResult(result);
@@ -82,28 +79,28 @@ public class MainActivity  extends AppCompatActivity implements
     //Kullanıcın oturum açıp, açamadığını dönen metod
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
-            // Oturum açma başarılı..
+
             GoogleSignInAccount acct = result.getSignInAccount();
-            // Kullanıcının adını textview set ettik..
+
             mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
-            // Kullanıcının resimin bulunduğu url alıp, bu resmi Picasso kütüphanesi ile imageview'de gösterdik
+
             Uri urldisplay =acct.getPhotoUrl();
             Picasso.with(MainActivity.this).load(String.valueOf(urldisplay)).into(imgProfilePic);
 
-            //Kimlik denetimi yapıldığını göstermek için updateUI true  yapıldı.
+
             updateUI(true);
         } else {
-            //Oturum açma başarısız...
+
 
             updateUI(false);
         }
     }
-    //Oturum açılcağı zaman çalışan metod
+
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
-    //Oturum kapatılcağı zaman çalışan metod
+
     private void signOut() {
         Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
                 new ResultCallback<Status>() {
