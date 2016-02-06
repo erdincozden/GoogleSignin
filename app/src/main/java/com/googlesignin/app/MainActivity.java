@@ -76,7 +76,7 @@ public class MainActivity  extends AppCompatActivity implements
             handleSignInResult(result);
         }
     }
-    //Kullanıcın oturum açıp, açamadığını dönen metod
+
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
 
@@ -85,6 +85,7 @@ public class MainActivity  extends AppCompatActivity implements
             mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
 
             Uri urldisplay =acct.getPhotoUrl();
+
             Picasso.with(MainActivity.this).load(String.valueOf(urldisplay)).into(imgProfilePic);
 
 
